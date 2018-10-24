@@ -1,0 +1,39 @@
+version: '3'
+services:
+  web:
+    build: ./web
+    command: >
+      gunicorn -b 0.0.0.0:8000
+        --access-logfile -
+        --reload
+        "app:app"
+    environment:
+      PYTHONUNBUFFERED: 'true'
+    ports:
+      - '8000:8000'
+    depends_on:
+      - postgres
+
+  postgres:
+    depends_on:
+      - data
+    restart: always
+    image: postgres:latest
+    volumes:
+      - data
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: user
+      POSTGRES_USER: user
+      POSTGRES_DB: test_db
+
+  data:
+    restart: always
+    image: postgres:latest
+    volumes:
+      - /var/lib/postgresql
+    command: "true"
+
+volumes:
+  postgres:
