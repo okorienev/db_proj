@@ -1,18 +1,26 @@
 sudo: required
 
 services:
-  -docker
+  - docker
 
 branches:
   except:
-    -dev
+    - dev
   only:
-    -master
+    - master
 
 before_install:
+  - sudo service postgresql stop
   - sudo apt-get update
-  - docker-compose build
-  - docker ps
 
 script:
-  - docker-compose up
+- docker-compose build
+- docker ps
+
+after_script:
+  - docker-compose up &
+  - jobs
+  - bg 1
+  - sleep 120 
+  - curl localhost:8000
+  - docker-compose down
