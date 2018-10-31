@@ -1,13 +1,13 @@
 sudo: required
 
 services:
-  -docker
+  - docker
 
 branches:
   except:
-    -dev
+    - dev
   only:
-    -master
+    - master
 
 before_install:
   - sudo apt-get update
