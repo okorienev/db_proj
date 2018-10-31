@@ -1,0 +1,18 @@
+sudo: required
+
+services:
+  -docker
+
+branches:
+  except:
+    -dev
+  only:
+    -master
+
+before_install:
+  - sudo apt-get update
+  - docker-compose build
+  - docker ps
+
+script:
+  - docker-compose up
