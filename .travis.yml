@@ -13,11 +13,11 @@ before_install:
   - sudo service postgresql stop
   - sudo apt-get update
 
-  - docker ps
 script:
-  - docker-compose build
+- docker-compose build
+- docker ps
 
 after_script:
-  - docker-compose up
+  - travis_wait 5 docker-compose up
   - curl localhost:8000
   - docker-compose down
