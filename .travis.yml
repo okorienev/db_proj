@@ -12,8 +12,12 @@ branches:
 before_install:
   - sudo service postgresql stop
   - sudo apt-get update
-  - docker-compose build
-  - docker ps
 
+  - docker ps
 script:
+  - docker-compose build
+
+after_script:
   - docker-compose up
+  - curl localhost:8000
+  - docker-compose down
