@@ -1,9 +1,18 @@
+sudo: required
+
+services:
+  -docker
+
+branches:
+  except:
+    -dev
+  only:
+    -master
+
 before_install:
   - sudo apt-get update
-  - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
-
-  - docker-compose pull
   - docker-compose build
-  - docker-compose start
-
   - docker ps
+
+script:
+  - docker-compose up
