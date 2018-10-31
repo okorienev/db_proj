@@ -19,5 +19,8 @@ script:
 
 after_script:
   - docker-compose up &
+  - jobs
+  - bg 1
+  - sleep 120 
   - curl localhost:8000
   - docker-compose down
