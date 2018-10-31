@@ -10,6 +10,7 @@ branches:
     - master
 
 before_install:
+  - sudo service postgresql stop
   - sudo apt-get update
   - docker-compose build
   - docker ps
