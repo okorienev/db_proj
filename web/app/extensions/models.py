@@ -8,11 +8,13 @@ class User(db.Model):
     user_id - key
     login - username to authenticate
     password - sha512 hash of user's password
+    email - email address
     role_id - foreign key which points to roles.role_id
     """
     __tablename__ = 'users'
 
     user_id = db.Column(db.Integer(), primary_key=True)
+    email = db.Column(db.String(40), nullable=False, unique=True)
     login = db.Column(db.String(20), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
     role_id = db.Column(db.ForeignKey('roles.role_id'))
@@ -39,16 +41,36 @@ class User(db.Model):
 class PersonalDataObject(db.Model):
     """
     model which declared personal data structure
+    some relations a made via @property instead of db.relationship cause two foreign keys (ids of persons which created
+    and edited record) point to the same table and this can cause them to load to both relations simultaneously
     """
     __tablename__ = 'personal_data'
 
-    pd_id = db.Column(db.Integer(), primary_key=True)
+    person_id = db.Column(db.Integer(), primary_key=True)
     person_name = db.Column(db.String(20), nullable=False)
     person_surname = db.Column(db.String(20), nullable=False)
     person_patronymic = db.Column(db.String(20), nullable=False)
     person_date_of_birth = db.Column(db.DateTime(), nullable=False)
     person_photo = db.Column(db.LargeBinary())
     person_json = db.Column(db.JSON())
+    person_created_by = db.Column(db.ForeignKey('users.user_id'))
+    person_creation_date = db.Column(db.DateTime())
+    person_last_edited_by = db.Column(db.ForeignKey('users.user_id'))
+    person_last_edit_date = db.Column(db.DateTime())
+
+    @property
+    def person_created_by_obj(self):
+        """
+        :return: Instance of  User class, user which created person record
+        """
+        return User.query.get(self.person_created_by)
+
+    @property
+    def person_last_edited_by_obj(self):
+        """
+        :return: Instance of User class, user which made last changes to the record
+        """
+        return User.query.get(self.person_last_edited_by)
 
     @property
     def full_name(self):
