@@ -4,10 +4,9 @@ services:
   - docker
 
 branches:
-  except:
-    - dev
   only:
     - master
+    - dev
 
 before_install:
   - sudo service postgresql stop
