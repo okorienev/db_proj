@@ -5,4 +5,5 @@ class Config(object):
     SQLALCHEMY_POOL_TIMEOUT = 5
     admin_login = 'admin'
     admin_pass = 'admin'
+    admin_email = 'admin@domain'
     pass

@@ -16,7 +16,8 @@ def hello_world():
 
 def create_admin():
     admin = User(login=Config.admin_login,
-                 password=sha512(Config.admin_pass.encode()).hexdigest())
+                 password=sha512(Config.admin_pass.encode()).hexdigest(),
+                 email=Config.admin_email)
     db.session.add(admin)
     db.session.commit()
 
@@ -38,7 +39,8 @@ def create_ext_types():
 
 @app.before_first_request
 def before_first_request():
-    db.drop_all()
-    db.create_all()
-    create_admin()
-
+    db.create_all()  # creating database, will not attempt to re-create tables
+    if User.query.count() == 0:
+        create_admin()
+    if ExtensionType.query.count() == 0:
+        create_ext_types()
