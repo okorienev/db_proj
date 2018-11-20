@@ -1,0 +1,102 @@
+@startuml
+
+hide empty members
+
+entity User{
+    *user_id
+    login
+    password
+    email
+    role_id
+}
+
+entity FieldType{
+    *field_type_id
+    name
+    field_archetype_id
+    required
+}
+
+entity FieldArchetype{
+    *archetype_id
+    name
+    shortened_name
+}
+object text
+object string
+object number
+
+entity Field{
+    *field_id
+    personal_card_id
+    field_type_id
+    value
+}
+
+entity Role{
+    *role_id
+    name
+}
+
+'entity BaseOperation{
+'    *bopt_id
+'    user
+'    personal_card
+'    p_name
+'    p_surname
+'    p_patronymic
+'    p_date_of_birth
+'    c_name
+'    c_surname
+'    c_patronymic
+'    c_date_of_birth
+'}
+
+entity Right{
+    *right_id
+    field_type_id
+    operation_type
+}
+entity OperationType{
+    *operation_type_id
+    name
+}
+
+entity Operation{
+    *operation_id
+    user
+    operation_type_id
+    date
+    field_id
+    previous
+    current
+}
+
+entity PersonalCard{
+    *personal_card_id
+    name
+    surname
+    patronymic
+    birth_date
+}
+
+
+'relation start'
+    Field }o--|| FieldType
+    Role ||--o{ User
+    FieldArchetype ||--o{ FieldType
+    Role }o--o{ Right
+    FieldType ||--o{ Role
+    OperationType ||--o{ Right
+    OperationType ||--o{ Operation
+    Field ||--o{ Operation
+'    PersonalCard ||--o{ BaseOperation
+'    User ||---o{ BaseOperation
+    User ||--o{ Operation
+    text --> FieldArchetype
+    string --> FieldArchetype
+    number --> FieldArchetype
+    Field }o--|| PersonalCard
+
+'relation end'
+@enduml
