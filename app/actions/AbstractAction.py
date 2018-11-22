@@ -1,27 +1,22 @@
-from abc import abstractmethod, ABCMeta
-
-
-class AbstractAction(ABCMeta):
+class AbstractAction:
     """
     class to declare common interface for console implementation of use cases
     """
     ACTION_NAME: str = None
     COMMAND_NAME: str = None
 
-    @staticmethod
-    @abstractmethod
-    def have_permission(user) -> bool:
-        """
-        :param user:
-        :return: should return boolean value of user permission
-        """
-        pass
+    def __init__(self, user):
+        self.user = user
 
-    @staticmethod
-    @abstractmethod
-    def handle() -> None:
+    def have_permission(self) -> bool:
+        """
+        :return: should return boolean value of current user permission to commit action
+        """
+        raise NotImplementedError
+
+    def handle(self) -> None:
         """
         method which gets control over the application (input, output, queries, etc)
         :return:
         """
-        pass
+        raise NotImplementedError
