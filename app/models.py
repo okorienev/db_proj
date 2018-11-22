@@ -10,6 +10,7 @@ from sqlalchemy import (Column,
                         DateTime,
                         Table)
 from sqlalchemy.orm import relationship, sessionmaker
+from hashlib import sha512
 
 
 engine = create_engine('mysql+pymysql://root:example@localhost:3306/test')
@@ -32,9 +33,13 @@ class User(Base):
     name = Column(String(50), nullable=False)
     login = Column(String(20), nullable=False, unique=True)
     email = Column(String(50), nullable=False, unique=True)
-    password = Column(String(64), nullable=False)
+    password = Column(String(128), nullable=False)
     role_id = Column(Integer, ForeignKey('roles.role_id'))
     role = relationship('Role', back_populates='users')
+    operations = relationship('Operation')
+
+    def check_password(self, password: str) -> bool:
+        return sha512(password.encode()).hexdigest() == self.password
 
 
 class Role(Base):
@@ -42,7 +47,8 @@ class Role(Base):
 
     role_id = Column(Integer, primary_key=True)
     name = Column(String(20), nullable=False, unique=True)
-    rights = relationship('Rights', secondary='roles_rights', back_populates='roles')
+    rights = relationship('Right', secondary='roles_rights', back_populates='roles')
+    users = relationship('User', back_populates='role')
 
 
 roles_rights = Table('roles_rights', Base.metadata,
@@ -58,6 +64,7 @@ class Right(Base):
     field_type = relationship('FieldType')
     operation_type_id = Column(Integer, ForeignKey('operation_types.opt_id'))
     operation_type = relationship("OperationType", back_populates='rights')
+    roles = relationship('Role', secondary=roles_rights, back_populates='rights')
 
 
 class FieldType(Base):
@@ -69,6 +76,7 @@ class FieldType(Base):
     sensitive = Column(Boolean, default=True)
     field_archetype_id = Column(Integer, ForeignKey('field_archetypes.fa_id'))
     field_archetype = relationship('FieldArchetype', back_populates='types')
+    fields = relationship('Field')
 
 
 class FieldArchetype(Base):
@@ -77,6 +85,7 @@ class FieldArchetype(Base):
     fa_id = Column(Integer, primary_key=True)
     name = Column(String(20), nullable=False, unique=True)
     shortened_name = Column(String(3), nullable=False, unique=True)
+    types = relationship('FieldType')
 
 
 class Field(Base):
@@ -84,7 +93,7 @@ class Field(Base):
 
     f_id = Column(Integer, primary_key=True)
     card_id = Column(Integer, ForeignKey('personal_cards.card_id'))
-    card = relationship('PersonalCard')
+    card = relationship('PersonalCard', back_populates='fields')
     field_type_id = Column(Integer, ForeignKey('field_types.ft_id'))
     field_type = relationship('FieldType', back_populates='fields')
     value = Column(LargeBinary)
@@ -98,6 +107,7 @@ class PersonalCard(Base):
     surname = Column(String(40), nullable=False)
     birth_date = Column(Date, nullable=True)
     patronymic = Column(String(40))
+    fields = relationship('Field')
 
 
 class OperationType(Base):
@@ -105,6 +115,8 @@ class OperationType(Base):
 
     opt_id = Column(Integer, primary_key=True)
     name = Column(String(30), unique=True, nullable=False)
+    rights = relationship('Right', back_populates='operation_type')
+    operations = relationship('Operation')
 
 
 class Operation(Base):
