@@ -22,6 +22,10 @@ def get_session():
     return Session()
 
 
+def delete_all():
+    Base.metadata.drop_all()
+
+
 def create_all():
     Base.metadata.create_all(engine)
 
@@ -37,6 +41,9 @@ class User(Base):
     role_id = Column(Integer, ForeignKey('roles.role_id'))
     role = relationship('Role', back_populates='users')
     operations = relationship('Operation')
+
+    def set_password(self, password: str):
+        self.password = sha512(password.encode()).hexdigest()
 
     def check_password(self, password: str) -> bool:
         return sha512(password.encode()).hexdigest() == self.password
@@ -133,3 +140,47 @@ class Operation(Base):
     field = relationship(Field)
     previous = Column(LargeBinary)
     current = Column(LargeBinary)
+
+
+if __name__ == "__main__":
+    create_all()
+    session = get_session()
+    # create field archetypes
+    archetypes = [
+        {"name": "integer", "shortened_name": "int"},
+        {"name": "string", "shortened_name": "str"},
+        {"name": "text", "shortened_name": "txt"}
+    ]
+    for art in archetypes:
+        session.add(FieldArchetype(**art))
+    # create operation types
+    operation_types = [  # list of use cases names to assign rights to perform some actions
+        {"name": "view-pd"},
+        {"name": "view-extended-pd"},
+        {"name": "add-by-hand"},
+        {"name": "import-pd"},
+        {"name": "export-pd"},
+        {"name": "create-role"},
+        {"name": "edit-role"},
+        {"name": "set-role"},
+        {"name": "edit-pd"},
+        {"name": "archive-pd"},
+        {"name": "view-pd-archived"},
+        {"name": "create-user"},
+        {"name": "edit-user"},
+    ]
+    for opt in operation_types:
+        session.add(OperationType(**opt))
+    # create admin role
+    admin_role = Role(name='admin')
+    # create admin
+    admin = User(name="Julius Caesar", login='admin', email='email')
+    admin.set_password('admin')
+    admin_role.users.append(admin)  # adding to relationship
+    session.add(admin)  # add admin object (non-dependable from role)
+    session.add(admin_role)  # add role object (dependable from user cause of created relationship)
+    # IDK do the two previous lines really work this way but i suggest it's better to take care about all insertion
+    # dependencies by hand rather that to hope that SQLAlchemy will make all the work by it's own (AlexPraefectus)
+    session.commit()
+    admin_role.rights.extend(session.query(OperationType).all())
+    session.commit()
