@@ -8,7 +8,7 @@ from sqlalchemy import (Column,
                         Date,
                         LargeBinary,
                         DateTime,
-                        Table)
+                        Table,)
 from sqlalchemy.orm import relationship, sessionmaker
 from hashlib import sha512
 
@@ -20,6 +20,10 @@ Session = sessionmaker(bind=engine)
 
 def get_session():
     return Session()
+
+
+def delete_all():
+    Base.metadata.drop_all(engine)
 
 
 def create_all():
@@ -38,8 +42,24 @@ class User(Base):
     role = relationship('Role', back_populates='users')
     operations = relationship('Operation')
 
+    def set_password(self, password: str):
+        self.password = sha512(password.encode()).hexdigest()
+
     def check_password(self, password: str) -> bool:
         return sha512(password.encode()).hexdigest() == self.password
+
+
+roles_rights = Table('roles_rights', Base.metadata,
+                     Column('role_id', Integer, ForeignKey('roles.role_id')),
+                     Column('right_id', Integer, ForeignKey('rights.right_id')))
+
+# class RolesRights(Base):
+#     __tablename__ = 'roles_rights'
+#
+#     role_id = Column(Integer(), ForeignKey('roles.role_id'))
+#     role = relationship('Role')
+#     right_id = Column(Integer(), ForeignKey('rights.right_id'))
+#     right = relationship('Rights')
 
 
 class Role(Base):
@@ -47,13 +67,10 @@ class Role(Base):
 
     role_id = Column(Integer, primary_key=True)
     name = Column(String(20), nullable=False, unique=True)
-    rights = relationship('Right', secondary='roles_rights', back_populates='roles')
+    rights = relationship('Right',
+                          secondary=roles_rights,
+                          back_populates='roles')
     users = relationship('User', back_populates='role')
-
-
-roles_rights = Table('roles_rights', Base.metadata,
-                     Column('role_id', Integer, ForeignKey('roles.role_id')),
-                     Column('right_id', Integer, ForeignKey('rights.right_id')))
 
 
 class Right(Base):
@@ -64,7 +81,9 @@ class Right(Base):
     field_type = relationship('FieldType')
     operation_type_id = Column(Integer, ForeignKey('operation_types.opt_id'))
     operation_type = relationship("OperationType", back_populates='rights')
-    roles = relationship('Role', secondary=roles_rights, back_populates='rights')
+    roles = relationship('Role',
+                         secondary=roles_rights,
+                         back_populates='rights')
 
 
 class FieldType(Base):
@@ -133,3 +152,47 @@ class Operation(Base):
     field = relationship(Field)
     previous = Column(LargeBinary)
     current = Column(LargeBinary)
+
+
+if __name__ == "__main__":
+    delete_all()
+    create_all()
+    session = get_session()
+    # create field archetypes
+    archetypes = [
+        {"name": "integer", "shortened_name": "int"},
+        {"name": "string", "shortened_name": "str"},
+        {"name": "text", "shortened_name": "txt"}
+    ]
+    for art in archetypes:
+        session.add(FieldArchetype(**art))
+    # create operation types
+    operation_types = [  # list of use cases names to assign rights to perform some actions
+        OperationType(**{"name": "view-pd"}),
+        OperationType(**{"name": "view-extended-pd"}),
+        OperationType(**{"name": "add-by-hand"}),
+        OperationType(**{"name": "import-pd"}),
+        OperationType(**{"name": "export-pd"}),
+        OperationType(**{"name": "create-role"}),
+        OperationType(**{"name": "edit-role"}),
+        OperationType(**{"name": "set-role"}),
+        OperationType(**{"name": "edit-pd"}),
+        OperationType(**{"name": "archive-pd"}),
+        OperationType(**{"name": "view-pd-archived"}),
+        OperationType(**{"name": "create-user"}),
+        OperationType(**{"name": "edit-user"}),
+    ]
+    for i in operation_types:
+        session.add(i)
+    admin_role = Role(name='admin') # create admin role
+    admin = User(name="Julius Caesar", login='admin', email='email') # create admin
+    admin.set_password('admin')  # setting password (can't be set directly cause db store only hashes)
+    admin_role.users.append(admin)  # adding to relationship
+    session.add(admin)  # add admin object (non-dependable from role)
+    session.add(admin_role)  # add role object (dependable from user cause of created relationship)
+    # add rights for admin
+    for operation_type in operation_types:
+        tmp_right = Right()
+        tmp_right.operation_type = operation_type
+        admin_role.rights.append(tmp_right)
+    session.commit()  # save all the changes to the db
