@@ -11,6 +11,7 @@ from sqlalchemy import (Column,
                         Table,)
 from sqlalchemy.orm import relationship, sessionmaker
 from hashlib import sha512
+from datetime import datetime
 
 
 engine = create_engine('mysql+pymysql://root:example@localhost:3306/test')
@@ -146,7 +147,7 @@ class Operation(Base):
     user_id = Column(Integer, ForeignKey('users.user_id'))
     user = relationship('User', back_populates='operations')
     opt_id = Column(Integer, ForeignKey('operation_types.opt_id'))
-    operation = relationship(OperationType, back_populates='operations')
+    operation_type = relationship(OperationType, back_populates='operations')
     date = Column(DateTime)
     field_id = Column(Integer, ForeignKey('fields.f_id'))
     field = relationship(Field)
@@ -160,12 +161,12 @@ if __name__ == "__main__":
     session = get_session()
     # create field archetypes
     archetypes = [
-        {"name": "integer", "shortened_name": "int"},
-        {"name": "string", "shortened_name": "str"},
-        {"name": "text", "shortened_name": "txt"}
+        FieldArchetype(**{"name": "integer", "shortened_name": "int"}),
+        FieldArchetype(**{"name": "string", "shortened_name": "str"}),
+        FieldArchetype(**{"name": "text", "shortened_name": "txt"})
     ]
     for art in archetypes:
-        session.add(FieldArchetype(**art))
+        session.add(art)
     # create operation types
     operation_types = [  # list of use cases names to assign rights to perform some actions
         OperationType(**{"name": "view-pd"}),
@@ -181,6 +182,7 @@ if __name__ == "__main__":
         OperationType(**{"name": "view-pd-archived"}),
         OperationType(**{"name": "create-user"}),
         OperationType(**{"name": "edit-user"}),
+        OperationType(name="login")
     ]
     for i in operation_types:
         session.add(i)
@@ -195,4 +197,50 @@ if __name__ == "__main__":
         tmp_right = Right()
         tmp_right.operation_type = operation_type
         admin_role.rights.append(tmp_right)
+    # add some field types to profiles
+    field_types = [
+        FieldType(name='biography', field_archetype=archetypes[2], required=True, sensitive=True),
+        FieldType(name='nickname', field_archetype=archetypes[1], required=False, sensitive=False),
+        FieldType(name='height', field_archetype=archetypes[0], required=True, sensitive=False)
+    ]
+    for i in field_types:
+        session.add(i)
+    # create profiles
+    cards = [
+        PersonalCard(name="James",
+                     surname='Bodn',
+                     birth_date=datetime.date(datetime.utcnow()),
+                     is_archive=False),
+        PersonalCard(name="John",
+                     surname="Snow",
+                     birth_date=datetime.date(datetime.utcnow()),
+                     is_archive=False),
+        PersonalCard(name="Steven",
+                     surname="Hoking",
+                     birth_date=datetime.date(datetime.utcnow()),
+                     is_archive=False),
+        PersonalCard(name="Igor",
+                     surname="Sikorsky",
+                     birth_date=datetime.date(datetime.utcnow()),
+                     is_archive=False)
+    ]
+    for i in cards:
+        session.add(i)
+    # add some custom fields
+    fields = [
+        Field(field_type=field_types[0], value="Some bio1".encode(), card=cards[0]),
+        Field(field_type=field_types[0], value="Some bio2".encode(), card=cards[1]),
+        Field(field_type=field_types[0], value="Some bio3".encode(), card=cards[2]),
+        Field(field_type=field_types[0], value="Some bio4".encode(), card=cards[3]),
+        Field(field_type=field_types[1], value="Some bio1".encode(), card=cards[0]),
+        Field(field_type=field_types[1], value="Some bio2".encode(), card=cards[1]),
+        Field(field_type=field_types[1], value="Some str3".encode(), card=cards[2]),
+        Field(field_type=field_types[1], value="Some str4".encode(), card=cards[3]),
+        Field(field_type=field_types[2], value="180".encode(), card=cards[0]),
+        Field(field_type=field_types[2], value="176".encode(), card=cards[1]),
+        Field(field_type=field_types[2], value="178".encode(), card=cards[2]),
+        Field(field_type=field_types[2], value="190".encode(), card=cards[3]),
+    ]
+    for i in fields:
+        session.add(i)
     session.commit()  # save all the changes to the db
