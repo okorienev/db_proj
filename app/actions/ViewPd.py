@@ -13,7 +13,7 @@ class ViewPd(AbstractAction):
             surname = input("Input surname: ").capitalize()
             patronymic = input("Input patronymic: ").capitalize()
 
-            if name.isalpha() and surname.isalpha() and patronymic.isalpha():
+            if name.isalpha() and surname.isalpha():
 
                 query = session.query(PersonalCard, Field, FieldType).filter(PersonalCard.card_id == Field.card_id,
                                                                              Field.field_type_id == FieldType.ft_id,

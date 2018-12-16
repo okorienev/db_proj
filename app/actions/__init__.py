@@ -12,4 +12,5 @@ from .DataImport import DataImport
 from .DataExport import DataExport
 from .StudentEdit import StudentEdit
 from .ArchivePD import ArchivePD
+from .AddByHand import AddByHand
 from .select_action import select_action

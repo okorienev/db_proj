@@ -14,27 +14,21 @@ class AbstractAction:
         session = get_session()
         operation = Operation(date=datetime.datetime.utcnow(),
                               user=self.user,
-                              operation_type=self.operation_type)
+                              operation_type=session.query(OperationType).filter(
+                                  OperationType.name == self.ACTION_NAME).first())
         session.add(operation)
         session.commit()
         del session
 
     def __init__(self, user: User):
         self.user: User = user
-        session = get_session()
-        self.operation_type: OperationType = session.query(OperationType).filter(
-            OperationType.name==self.ACTION_NAME
-        ).first()
-        del session
-        if not self.operation_type:
-            raise ValueError("Can't find operation with given type")
 
     def have_permission(self) -> bool:
         """
         todo universal permission check for all cases
         :return: should return boolean value of current user permission to commit action
         """
-        return self.user.role in self.operation_type.rights.roles
+        return self.ACTION_NAME in [right.operation_type.name for right in self.user.role.rights]
 
     @abstractmethod
     def handle(self) -> None:

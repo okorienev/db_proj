@@ -1,5 +1,6 @@
 from app.actions import Login
 from app.actions import select_action
+from warnings import warn
 
 
 class LifeLoop:
@@ -19,7 +20,11 @@ class LifeLoop:
             print('_'*80)
             action_class = select_action(input('Type command, \'help\' to display list of commands'))
             action = action_class(self.user)
-            action.handle()
+            if action.have_permission():
+                action.handle()
+                # action.log_operation()
+            else:
+                warn("Permission denied")
 
 
 if __name__ == "__main__":

@@ -5,7 +5,12 @@ from . import (ViewExtendedPd,
                CreateRole,
                CreateUser,
                Help,
-               ResetPassword)
+               AddByHand,
+               StudentEdit,
+               ResetPassword,
+               DataExport,
+               DataImport,
+               ArchivePD)
 
 
 def select_action(name):
@@ -15,12 +20,18 @@ def select_action(name):
     :return: class of found action or None
     """
     cases = {
-        "view-extended-pd": ViewExtendedPd,
-        "edit-user": EditUser,
-        "create-user": CreateUser,
-        "create-role": CreateRole,
-        "help": Help,
-        "view-pd": ViewPd,
-        "view-pd-archived": ViewPdArchived
+        ViewExtendedPd: ViewExtendedPd,
+        EditUser.COMMAND_NAME: EditUser,
+        CreateUser.COMMAND_NAME: CreateUser,
+        CreateRole.COMMAND_NAME: CreateRole,
+        Help.COMMAND_NAME: Help,
+        ViewPd.COMMAND_NAME: ViewPd,
+        ViewPdArchived.COMMAND_NAME: ViewPdArchived,
+        AddByHand.COMMAND_NAME: AddByHand,
+        StudentEdit.COMMAND_NAME: StudentEdit,
+        ResetPassword.COMMAND_NAME: ResetPassword,
+        DataImport.COMMAND_NAME: DataImport,
+        DataExport.COMMAND_NAME: DataExport,
+        ArchivePD.COMMAND_NAME: ArchivePD
     }
     return cases.get(name) if cases.get(name) is not None else Help
