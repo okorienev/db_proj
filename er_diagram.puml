@@ -82,21 +82,37 @@ entity PersonalCard{
 
 
 'relation start'
-    Field }o--|| FieldType
-    Role ||--o{ User
-    FieldArchetype ||--o{ FieldType
-    Role }o--o{ Right
-    FieldType ||--o{ Role
-    OperationType ||--o{ Right
-    OperationType ||--o{ Operation
-    Field ||--o{ Operation
+'    Field }o--|| FieldType
+'    Role ||--o{ User
+'    FieldArchetype ||--o{ FieldType
+'    Role }o--o{ Right
+'    FieldType ||--o{ Role
+'    OperationType ||--o{ Right
+'    OperationType ||--o{ Operation
+'    Field ||--o{ Operation
 '    PersonalCard ||--o{ BaseOperation
 '    User ||---o{ BaseOperation
-    User ||--o{ Operation
+'    User ||--o{ Operation
+'    text --> FieldArchetype
+'    string --> FieldArchetype
+'    number --> FieldArchetype
+'    Field }o--|| PersonalCard
+
+    Field ||--o{ FieldType
+    Role }o--|| User
+    FieldArchetype }o--|| FieldType
+    Role }o--o{ Right
+    FieldType }o--|| Role
+    OperationType }o--|| Right
+    OperationType }o--|| Operation
+    Field }o--|| Operation
+'    PersonalCard }o--|| BaseOperation
+'    User |}o--|| BaseOperation
+    User }o--|| Operation
     text --> FieldArchetype
     string --> FieldArchetype
     number --> FieldArchetype
-    Field }o--|| PersonalCard
+    Field ||--o{ PersonalCard
 
 'relation end'
 @enduml
