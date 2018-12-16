@@ -3,6 +3,8 @@ from app.models import User, get_session, Role
 
 
 class CreateUser(AbstractAction):
+    ACTION_NAME = "create-user"
+    COMMAND_NAME = "creade-user"
 
     def handle(self) -> None:
         session = get_session()
@@ -10,7 +12,7 @@ class CreateUser(AbstractAction):
             name = input("Type user name")
             if name:
                 break
-            print("!!!!!")
+            print("name can not be empty")
         while True:
             mail = input("Type user email")
             if len(mail) > 10 and '@' in mail:
@@ -20,7 +22,7 @@ class CreateUser(AbstractAction):
             login = input("Type user login")
             if len(login) > 6 and login.isalnum():
                 break
-            print("!!!!!")
+            print("")
         while True:
             password = input("Type user password")
             if len(password) > 6:

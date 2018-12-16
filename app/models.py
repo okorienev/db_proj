@@ -182,7 +182,9 @@ if __name__ == "__main__":
         OperationType(**{"name": "view-pd-archived"}),
         OperationType(**{"name": "create-user"}),
         OperationType(**{"name": "edit-user"}),
-        OperationType(name="login")
+        OperationType(name="login"),
+        OperationType(name="reset-pass"),
+        OperationType(name='help')
     ]
     for i in operation_types:
         session.add(i)

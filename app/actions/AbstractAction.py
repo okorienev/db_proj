@@ -17,6 +17,7 @@ class AbstractAction:
                               operation_type=self.operation_type)
         session.add(operation)
         session.commit()
+        del session
 
     def __init__(self, user: User):
         self.user: User = user
@@ -24,6 +25,7 @@ class AbstractAction:
         self.operation_type: OperationType = session.query(OperationType).filter(
             OperationType.name==self.ACTION_NAME
         ).first()
+        del session
         if not self.operation_type:
             raise ValueError("Can't find operation with given type")
 
@@ -33,7 +35,6 @@ class AbstractAction:
         :return: should return boolean value of current user permission to commit action
         """
         return self.user.role in self.operation_type.rights.roles
-
 
     @abstractmethod
     def handle(self) -> None:
