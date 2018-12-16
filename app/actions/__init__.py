@@ -4,3 +4,5 @@ from .Login import Login
 from .CreateUser import CreateUser
 from .EditUser import EditUser
 from .CreateRole import CreateRole
+from .StudentEdit import StudentEdit
+from .ArchivePD import ArchivePD
