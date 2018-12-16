@@ -8,5 +8,8 @@ from .ResetPassword import ResetPassword
 from .CreateRole import CreateRole
 from .Help import Help
 from .EditUser import EditUser
+from .CreateRole import CreateRole
+from .StudentEdit import StudentEdit
+from .ArchivePD import ArchivePD
 from .select_action import select_action
 
