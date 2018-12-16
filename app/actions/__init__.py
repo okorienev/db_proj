@@ -5,7 +5,6 @@ from .ViewExtendedPd import ViewExtendedPd
 from .ViewPd import ViewPd
 from .ViewPdArchived import ViewPdArchived
 from .ResetPassword import ResetPassword
-from .CreateRole import CreateRole
 from .Help import Help
 from .EditUser import EditUser
 from .CreateRole import CreateRole
